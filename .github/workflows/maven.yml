@@ -53,3 +53,6 @@ jobs:
         port: ${{ secrets.SSH_PORT }}
         script_stop: true
         script: "./startup.sh"
+        
+    - name : Run SonarQube
+      run : mvn sonar:sonar -Dsonar.projectKey=bookbom-auth -Dsonar.host.url=${{secrets.SONAR_HOST}} -Dsonar.login=${{secrets.SONAR_TOKEN}}
