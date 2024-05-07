@@ -3,6 +3,7 @@ package shop.bookbom.auth.controller;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
@@ -56,6 +57,32 @@ public class AuthController {
         log.info("getAccessNRefreshToken : \n accessToken : " + accessNRefreshTokenDto.getAccessToken() +
                 "\n refreshToken : " + accessNRefreshTokenDto.getRefreshToken());
         return CommonResponse.successWithData(accessNRefreshTokenDto);
+    }
+
+    /**
+     * refreshToken을 가지고 accessToken을 cookie로 발급받는 api
+     *
+     * @param refreshToken
+     * @return
+     */
+    @PostMapping("/token/refresh")
+    public CommonResponse refreshAccessToken(HttpServletResponse response,
+                                             @RequestBody @Valid @NotBlank String refreshToken,
+                                             BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            throw new BaseException(ErrorCode.COMMON_INVALID_PARAMETER);
+        }
+        log.info(refreshToken);
+
+        String accessToken = jwtReturnService.refreshAccessToken(refreshToken);
+
+        Cookie accessTokenCookie = new Cookie("accessToken", accessToken);
+        accessTokenCookie.setHttpOnly(true);
+        accessTokenCookie.setPath("/");
+        accessTokenCookie.setSecure(true);
+        response.addCookie(accessTokenCookie);
+
+        return CommonResponse.success();
     }
 
 }

@@ -12,6 +12,7 @@ import shop.bookbom.auth.adapter.UserRoleAdapter;
 import shop.bookbom.auth.common.CommonResponse;
 import shop.bookbom.auth.common.exception.BaseException;
 import shop.bookbom.auth.common.exception.ErrorCode;
+import shop.bookbom.auth.exception.RefreshTokenNotFoundException;
 import shop.bookbom.auth.member.SignInDTO;
 import shop.bookbom.auth.member.UserDto;
 import shop.bookbom.auth.token.RefreshToken;
@@ -56,6 +57,22 @@ public class JwtReturnService {
                 .accessToken(createJwt(userDto))
                 .refreshToken(refreshToken.getRefreshToken())
                 .build();
+    }
+
+    /**
+     * refreshToken을 조회하여 accessToken을 발급
+     */
+    public String refreshAccessToken(String token) {
+        // redis repository를 통해 refresh token을 찾는다
+        // 만약 없으면 exception을 날린다
+        RefreshToken refreshtoken = redisRepository.findById(token)
+                .orElseThrow(RefreshTokenNotFoundException::new);
+
+        // 있다면 refreshtoken과 함께 redis에 저장되어있던 user id와 role를 통해 accessToken을 만들어 전송한다.
+        Long userId = Long.valueOf(refreshtoken.getUserIdNRole().split("\\|")[0]);
+        String role = refreshtoken.getUserIdNRole().split("\\|")[1];
+        log.info("role is : " + role);
+        return createJwt(UserDto.builder().userId(userId).role(role).build());
     }
 
     /**
