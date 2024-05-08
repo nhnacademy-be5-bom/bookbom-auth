@@ -38,6 +38,7 @@ public class AuthController {
     public CommonResponse<AccessNRefreshTokenDto> getAccessNRefreshToken(HttpServletResponse response,
                                                                          @RequestBody @Valid SignInDTO signInDTO,
                                                                          BindingResult bindingResult) {
+        log.info("getAccessToken&RefreshToken");
         if (bindingResult.hasErrors()) {
             throw new BaseException(ErrorCode.COMMON_INVALID_PARAMETER);
         }

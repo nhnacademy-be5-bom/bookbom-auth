@@ -24,7 +24,7 @@ import shop.bookbom.auth.token.repository.RefreshTokenRedisRepository;
 @RequiredArgsConstructor
 public class JwtReturnService {
 
-    @Value("${jwt.secretKey}")
+    @Value("${jwt.secret-key}")
     private String secretKey;
 
     private final RefreshTokenRedisRepository redisRepository;
