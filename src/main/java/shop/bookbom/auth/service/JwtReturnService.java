@@ -12,6 +12,7 @@ import shop.bookbom.auth.adapter.UserRoleAdapter;
 import shop.bookbom.auth.common.CommonResponse;
 import shop.bookbom.auth.common.exception.BaseException;
 import shop.bookbom.auth.common.exception.ErrorCode;
+import shop.bookbom.auth.config.SecureManager;
 import shop.bookbom.auth.exception.RefreshTokenNotFoundException;
 import shop.bookbom.auth.member.SignInDTO;
 import shop.bookbom.auth.member.UserDto;
@@ -23,6 +24,7 @@ import shop.bookbom.auth.token.repository.RefreshTokenRedisRepository;
 @Service
 @RequiredArgsConstructor
 public class JwtReturnService {
+    private final SecureManager secureManager;
 
     @Value("${jwt.secret-key}")
     private String secretKey;
@@ -79,14 +81,15 @@ public class JwtReturnService {
      * accessToken 발급을 위한 메소드
      */
     public String createJwt(UserDto userDto) {
-        log.info(Arrays.toString(secretKey.getBytes()));
+        String JwtSecretKey = secureManager.getValue(secretKey);
+        log.info(Arrays.toString(JwtSecretKey.getBytes()));
 
         String jwtToken = Jwts.builder()
                 .claim("userId", userDto.getUserId())
                 .claim("role", userDto.getRole())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 3600 * 1000)) // 1시간으로 설정
-                .signWith(SignatureAlgorithm.HS256, secretKey.getBytes())
+                .signWith(SignatureAlgorithm.HS256, JwtSecretKey.getBytes())
                 .compact();
 
         log.info(jwtToken);
