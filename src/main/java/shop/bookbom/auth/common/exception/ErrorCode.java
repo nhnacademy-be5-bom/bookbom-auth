@@ -16,8 +16,8 @@ public enum ErrorCode {
     USER_NOT_FOUND(400, "존재하지 않는 사용자입니다"),
     // token
     REFRESHTOKEN_IS_NULL(400, "요청한 값이 올바르지 않습니다"),
-    REFRESHTOKEN_NOT_FOUND(400, "리프래시 토큰이 존재하지 않습니다")
-    ;
+    DATA_NOT_VALID(400, "요청한 값이 올바르지 않습니다."),
+    REFRESHTOKEN_NOT_FOUND(400, "리프래시 토큰이 존재하지 않습니다");
     private final int code;
     private final String message;
 }
