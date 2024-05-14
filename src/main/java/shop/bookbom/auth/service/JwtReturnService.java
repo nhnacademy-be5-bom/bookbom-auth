@@ -37,6 +37,7 @@ public class JwtReturnService {
      * REFRESH TOKEN은 UUID.randomUUID().toString로 발급한다.
      * 발급 후 REDIS에 저장하여 관리한다.
      */
+    @Transactional
     public AccessNRefreshTokenDto createAccessNRefreshToken(SignInDTO signInDTO) {
         // shop 서버에서 userId와 role을 받아온다
         CommonResponse<UserDto> userDtoResponse = userRoleAdapter.signIn(signInDTO);
@@ -62,6 +63,7 @@ public class JwtReturnService {
     /**
      * refreshToken을 조회하여 accessToken을 발급
      */
+    @Transactional
     public String refreshAccessToken(String token) {
         // redis repository를 통해 refresh token을 찾는다
         // 만약 없으면 exception을 날린다
