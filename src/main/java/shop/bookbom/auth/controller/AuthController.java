@@ -11,8 +11,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import shop.bookbom.auth.common.CommonResponse;
-import shop.bookbom.auth.common.exception.BaseException;
-import shop.bookbom.auth.common.exception.ErrorCode;
 import shop.bookbom.auth.exception.DataNotValidException;
 import shop.bookbom.auth.member.SignInDTO;
 import shop.bookbom.auth.service.JwtReturnService;
@@ -35,8 +33,7 @@ public class AuthController {
      * @return accessNRefreshTokenDto : accessToken refreshToken
      */
     @PostMapping("/token")
-    public CommonResponse<AccessNRefreshTokenDto> getAccessNRefreshToken(HttpServletResponse response,
-                                                                         @RequestBody @Valid SignInDTO signInDTO,
+    public CommonResponse<AccessNRefreshTokenDto> getAccessNRefreshToken(@RequestBody @Valid SignInDTO signInDTO,
                                                                          BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             throw new DataNotValidException();
@@ -56,10 +53,9 @@ public class AuthController {
                                                      @RequestBody @Valid @NotBlank String refreshToken,
                                                      BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            throw new BaseException(ErrorCode.COMMON_INVALID_PARAMETER);
+            throw new DataNotValidException();
         }
         String accessToken = jwtReturnService.refreshAccessToken(refreshToken);
-
         return CommonResponse.successWithData(accessToken);
     }
 
