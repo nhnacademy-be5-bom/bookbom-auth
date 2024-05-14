@@ -2,17 +2,16 @@ package shop.bookbom.auth.service;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import java.util.Arrays;
 import java.util.Date;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import shop.bookbom.auth.adapter.UserRoleAdapter;
 import shop.bookbom.auth.common.CommonResponse;
-import shop.bookbom.auth.common.exception.BaseException;
-import shop.bookbom.auth.common.exception.ErrorCode;
 import shop.bookbom.auth.exception.RefreshTokenNotFoundException;
+import shop.bookbom.auth.exception.UserNotFoundException;
 import shop.bookbom.auth.member.SignInDTO;
 import shop.bookbom.auth.member.UserDto;
 import shop.bookbom.auth.token.RefreshToken;
@@ -44,7 +43,8 @@ public class JwtReturnService {
 
         // 서버에서 정보를 받아오지 못하거나, 받아온 정보가 비어있을 때 USER_NOT_FOUND EXCEPTION을 던진다.
         if (!userDtoResponse.getHeader().isSuccessful() || userDtoResponse.getResult().getRole().isEmpty()) {
-            throw new BaseException(ErrorCode.USER_NOT_FOUND, userDtoResponse.getHeader().getResultMessage());
+            log.error("user not found");
+            throw new UserNotFoundException();
         }
 
         UserDto userDto = userDtoResponse.getResult();
@@ -73,7 +73,6 @@ public class JwtReturnService {
         // 있다면 refreshtoken과 함께 redis에 저장되어있던 user id와 role를 통해 accessToken을 만들어 전송한다.
         Long userId = Long.valueOf(refreshtoken.getUserIdNRole().split("\\|")[0]);
         String role = refreshtoken.getUserIdNRole().split("\\|")[1];
-        log.info("role is : " + role);
         return createJwt(UserDto.builder().userId(userId).role(role).build());
     }
 
@@ -81,8 +80,6 @@ public class JwtReturnService {
      * accessToken 발급을 위한 메소드
      */
     public String createJwt(UserDto userDto) {
-        log.info(Arrays.toString(secretKey.getBytes()));
-
         String jwtToken = Jwts.builder()
                 .claim("userId", userDto.getUserId())
                 .claim("role", userDto.getRole())
@@ -90,8 +87,6 @@ public class JwtReturnService {
                 .setExpiration(new Date(System.currentTimeMillis() + 3600 * 1000)) // 1시간으로 설정
                 .signWith(SignatureAlgorithm.HS256, secretKey.getBytes())
                 .compact();
-
-        log.info(jwtToken);
         return jwtToken;
     }
 
